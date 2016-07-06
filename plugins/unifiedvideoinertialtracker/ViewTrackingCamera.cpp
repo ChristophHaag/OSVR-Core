@@ -28,6 +28,7 @@
 
 // Library/third-party includes
 #include <opencv2/highgui/highgui.hpp>
+#include <vrpn_SerialPort.h>
 
 // Standard includes
 #include <chrono>
@@ -136,15 +137,45 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 #endif
-
+    vrpn_SerialPort comPort("COM6", 115200);
+    if (!comPort.is_open()) {
+        std::cerr << "Couldn't open com port!" << std::endl;
+        return -1;
+    }
+    bool startedTrigger = false;
+    using osvr::util::time::TimeValue;
+    TimeValue triggerTime = {};
+	double peakVal = 0.;
     cv::namedWindow(windowNameAndInstructions);
     auto frameCount = std::size_t{0};
     do {
-        cam->retrieve(frame, grayFrame);
+        TimeValue tv;
+        cam->retrieve(frame, grayFrame, tv);
 
 #ifdef OSVR_ENABLE_RECORDING
         outputVideo.write(frame);
 #endif
+
+        if (startedTrigger) {
+            auto now = osvr::util::time::getNow();
+            double minVal, maxVal;
+            cv::minMaxIdx(grayFrame, &minVal, &maxVal);
+			//if (maxVal < peakVal) {
+            if (maxVal > 150.) {
+                // we got it
+                startedTrigger = false;
+                osvrTimeValueDifference(&now, &triggerTime);
+                osvrTimeValueDifference(&tv, &triggerTime);
+				std::cout <</* "Peak value: " << peakVal <<*/ "   Current: " << maxVal << "\n";
+                std::cout << "Latency from trigger to sample time: "
+                          << tv.microseconds << "us\n";
+                std::cout << "Latency from trigger to retrieval time: "
+                          << now.microseconds << "us\n";
+                cv::imwrite("triggered.png", frame);
+			}/* else {
+				peakVal = maxVal;
+			}*/
+        }
 
         counter.gotFrame();
         ++frameCount;
@@ -167,6 +198,14 @@ int main(int argc, char *argv[]) {
                 cv::imwrite(os.str(), frame);
                 std::cout << "Captured frame to " << os.str() << std::endl;
                 captures++;
+            } else if ('t' == key) {
+                // trigger timing
+                startedTrigger = true;
+				peakVal = 0.;
+                auto buf = "a";
+                comPort.write(reinterpret_cast<const unsigned char *>(buf), 1);
+                comPort.drain_output_buffer();
+                triggerTime = osvr::util::time::getNow();
             }
         }
     } while (cam->grab());
