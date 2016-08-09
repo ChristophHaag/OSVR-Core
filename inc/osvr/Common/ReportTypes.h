@@ -47,8 +47,8 @@ namespace common {
             OSVR_LinearVelocityReport, OSVR_AngularVelocityReport,
             OSVR_AccelerationReport, OSVR_LinearAccelerationReport,
             OSVR_AngularAccelerationReport, OSVR_ImagingReport,
-            OSVR_ImagingReport, OSVR_Location2DReport, OSVR_DirectionReport,
-            OSVR_EyeTracker2DReport, OSVR_EyeTracker3DReport,
+            OSVR_ImagingReport, OSVR_Location2DReport, OSVR_DisplayReport,
+            OSVR_DirectionReport, OSVR_EyeTracker2DReport, OSVR_EyeTracker3DReport,
             OSVR_EyeTrackerBlinkReport, OSVR_NaviVelocityReport,
             OSVR_NaviPositionReport>;
     } // namespace traits

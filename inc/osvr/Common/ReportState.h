@@ -96,6 +96,17 @@ namespace common {
             }
         };
 
+        // Template specialization to handle OSVR_DisplayReport
+        template <> struct ReportStateGetter<OSVR_DisplayReport> {
+            static OSVR_DisplayState const &
+                apply(OSVR_DisplayReport const &r) {
+                return r.state;
+            }
+            static OSVR_DisplayState apply(OSVR_DisplayReport &r) {
+                return r.state;
+            }
+        };
+
         // Template specialization to handle OSVR_DirectionReport
         template <> struct ReportStateGetter<OSVR_DirectionReport> {
             static OSVR_DirectionState const &

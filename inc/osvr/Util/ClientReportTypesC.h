@@ -38,6 +38,7 @@
 #include <osvr/Util/Vec3C.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/BoolC.h>
+#include <osvr/Util/DisplayStateC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -313,6 +314,11 @@ typedef struct OSVR_EyeTrackerBlinkReport {
     OSVR_ChannelCount sensor;
     OSVR_EyeTrackerBlinkState state;
 } OSVR_EyeTrackerBlinkReport;
+
+typedef struct OSVR_DisplayReport {
+    OSVR_ChannelCount sensor;
+    OSVR_DisplayState state;
+} OSVR_DisplayReport;
 
 /** @brief Report type for an Imaging callback (forward declaration) */
 struct OSVR_ImagingReport;

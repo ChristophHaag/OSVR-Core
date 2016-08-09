@@ -32,6 +32,7 @@
 #include <osvr/Util/BoolC.h>
 #include <osvr/Util/Vec2C.h>
 #include <osvr/Util/Vec3C.h>
+#include <osvr/Util/DisplayStateC.h>
 #include <osvr/Util/TypeSafeId.h>
 
 // Library/third-party includes
@@ -563,6 +564,15 @@ namespace common {
             : SimpleStructSerializationBase {
             template <typename F, typename T> static void apply(F &f, T &val) {
                 f(val.value());
+            }
+        };
+
+        template <>
+        struct SimpleStructSerialization<OSVR_DisplayState>
+            : SimpleStructSerializationBase{
+            template <typename F, typename T> static void apply(F &f, T &val) {
+                // @todo
+                f(val.placeholder);
             }
         };
 

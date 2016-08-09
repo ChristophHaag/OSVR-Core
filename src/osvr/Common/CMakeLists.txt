@@ -75,6 +75,7 @@ set(API
     "${HEADER_LOCATION}/JSONTimestamp.h"
     "${HEADER_LOCATION}/JSONTransformVisitor.h"
     "${HEADER_LOCATION}/Location2DComponent.h"
+	"${HEADER_LOCATION}/DisplayComponent.h"
     "${HEADER_LOCATION}/LocomotionComponent.h"
     "${HEADER_LOCATION}/LowLatency.h"
     "${HEADER_LOCATION}/MessageHandler.h"
@@ -148,6 +149,7 @@ set(SOURCE
     IPCRingBufferSharedObjects.h
     JSONTransformVisitor.cpp
     Location2DComponent.cpp
+    DisplayComponent.cpp
     LocomotionComponent.cpp
     LowLatency.cpp
     MessageHandler.cpp
