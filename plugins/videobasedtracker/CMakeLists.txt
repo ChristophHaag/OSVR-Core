@@ -170,6 +170,10 @@ if(BUILD_TESTING)
 
     if(WIN32)
         target_link_libraries(vbtracker-cam PRIVATE directshow-camera)
+    else()
+	target_link_libraries(vbtracker-cam
+	  PRIVATE
+	  vbtracker-core ${libuvc_LIBRARIES})
     endif()
 endif()
 

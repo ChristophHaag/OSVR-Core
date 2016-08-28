@@ -33,6 +33,10 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#ifndef _WIN32
+#include <libuvc/libuvc.h>
+#endif
+
 // Standard includes
 #include <iostream>
 
@@ -41,16 +45,18 @@ using osvr::vbtracker::CameraParameters;
 class Main {
   public:
     Main() : m_camera(0) {
+
+#ifdef _WIN32
         int height = 0;
         int width = 0;
-        if (!m_camera.isOpened()) {
+	if (!m_camera.isOpened()) {
             std::cerr << "Couldn't open camera" << std::endl;
             return;
         }
 
         height = static_cast<int>(m_camera.get(CV_CAP_PROP_FRAME_HEIGHT));
         width = static_cast<int>(m_camera.get(CV_CAP_PROP_FRAME_WIDTH));
-
+	
         // See if this is an Oculus camera by checking the dimensions of
         // the image.  This camera type improperly describes its format
         // as being a color format when it is in fact a mono format.
@@ -64,6 +70,53 @@ class Main {
         std::cout << "Got image of size " << width << "x" << height
                   << ", Format " << m_camera.get(CV_CAP_PROP_FORMAT)
                   << ", Mode " << m_camera.get(CV_CAP_PROP_MODE) << std::endl;
+#else
+	uvc_context_t *ctx;
+	uvc_error_t res;
+	uvc_device_t *dev;
+	uvc_device_handle_t *devh;
+	uvc_stream_ctrl_t ctrl;
+
+	res = uvc_init(&ctx, NULL);
+
+	if (res < 0) {
+	  uvc_perror(res, "uvc_init");
+	  return;
+	}
+
+	puts("UVC initialized");
+
+	res = uvc_find_device(
+	    ctx, &dev,
+	    0, 0, NULL);
+
+	if (res < 0) {
+	  uvc_perror(res, "uvc_find_device");
+	} else {
+	  puts("Device found");
+
+	  res = uvc_open(dev, &devh);
+
+	  if (res < 0) {
+	    uvc_perror(res, "uvc_open");
+	  } else {
+	    puts("Device opened");
+	    //uvc_print_diag(devh, stderr);
+	  }
+	  res = uvc_get_stream_ctrl_format_size(
+          devh, &ctrl, /* result stored in ctrl */
+          UVC_FRAME_FORMAT_YUYV, /* YUV 422, aka YUV 4:2:2. try _COMPRESSED */
+          640, 480, 30 /* width, height, fps */
+      );
+
+      /* Print out the result */
+      uvc_print_stream_ctrl(&ctrl, stderr);
+	}
+	
+	int width = 640;
+	int height = 480;
+#endif
+
 
         /// @todo Come up with actual estimates for camera and distortion
         /// parameters by calibrating them in OpenCV.
@@ -85,7 +138,11 @@ class Main {
 
     /// @return true if the app should exit.
     bool update() {
+#ifdef _WIN32
         if (!m_valid || !m_camera.isOpened()) {
+#else
+        if (!m_valid) {
+#endif
             return true;
         }
         if (!m_camera.grab()) {
