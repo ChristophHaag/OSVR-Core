@@ -33,6 +33,10 @@
 // Library/third-party includes
 #include <libuvc/libuvc.h>
 #include <opencv2/core/core_c.h>
+#include <chrono>
+#include <ios>
+auto start = std::chrono::high_resolution_clock::now();
+auto end = std::chrono::high_resolution_clock::now();
 
 // Standard includes
 #include <memory>
@@ -119,20 +123,26 @@ namespace vbtracker {
             uvc_exit(uvcContext_);
             throw std::runtime_error("Error opening camera: " + std::string(uvc_strerror(open_res)));
         }
-        //uvc_print_diag(cameraHandle_, stdout);
+        uvc_print_diag(cameraHandle_, stdout);
 
         // Setup streaming parameters
         const int resolution_x = 640; // pixels
         const int resolution_y = 480; // pixels
         resolution_ = cvSize(resolution_x, resolution_y);
         const int frame_rate = 100; // fps
+
+
+        //not needed on the windows driver:
+        //std::cout << "gain: " << uvc_set_gain(cameraHandle_, 10000) << std::endl;
+
         const auto setup_res = uvc_get_stream_ctrl_format_size(cameraHandle_,
                                                                &streamControl_,
                                                                UVC_FRAME_FORMAT_MJPEG,
                                                                resolution_x,
                                                                resolution_y,
                                                                frame_rate);
-        //uvc_print_stream_ctrl(&streamControl_, stdout);
+
+        uvc_print_stream_ctrl(&streamControl_, stdout);
         if (UVC_SUCCESS != setup_res) {
             std::cerr << "Error setting up requested stream format. "
                 + std::string(uvc_strerror(setup_res));
@@ -140,13 +150,24 @@ namespace vbtracker {
 
         // Start streaming video.
         const auto stream_res = uvc_start_streaming(cameraHandle_, &streamControl_, &UVCImageSource::callback, this, 0);
+        std::cout << "ae_mode       : " << uvc_set_ae_mode(cameraHandle_, 1) << std::endl;
+        std::cout << "ae_priority   : " << uvc_set_ae_priority(cameraHandle_, 0) << std::endl; // doesn't work
+        std::cout << "powerline freq: " << uvc_set_power_line_frequency(cameraHandle_, 1) << std::endl;
+        for (int i = 0; i < 10000; i++) {
+            if (uvc_set_exposure_abs(cameraHandle_, i) != -9) {
+                std::cout << "exp: " << i << ": " << uvc_set_exposure_abs(cameraHandle_, i) << std::endl;
+            }
+        }
+        std::cout << "exposure_abs       : " << uvc_set_exposure_abs(cameraHandle_, 100) << std::endl;
+        //std::cout << "backlight_comp: " << uvc_set_backlight_compensation(cameraHandle_, 1) << std::endl;
+        //std::cout << "brightness    : " << uvc_set_brightness(cameraHandle_, 15) << std::endl;
+        //std::cout << "contrast      : " << uvc_set_contrast(cameraHandle_, 50) << std::endl;
         if (UVC_SUCCESS != stream_res) {
             uvc_close(cameraHandle_);
             uvc_unref_device(camera_);
             uvc_exit(uvcContext_);
             throw std::runtime_error("Error streaming from camera: " + std::string(uvc_strerror(stream_res)));
         }
-
     }
 
     UVCImageSource::~UVCImageSource()
@@ -177,8 +198,12 @@ namespace vbtracker {
         // Instead, grab() will set a flag to alert the callback function that
         // we wish to store the next frame and retrieve() will return that
         // frame.
-        std::lock_guard<std::mutex> guard(mutex_);
-        return (frame_ != nullptr);
+        //std::lock_guard<std::mutex> guard(mutex_);
+        //return (frame_ != nullptr);
+
+        // we're grabbing every frame
+        // retrieve will just be blocked until next frame is ready
+        return true;
     }
 
     cv::Size UVCImageSource::resolution() const
@@ -224,6 +249,10 @@ namespace vbtracker {
 
     void UVCImageSource::callback(uvc_frame_t *frame, void *ptr)
     {
+        end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count();
+        std::cout << std::fixed << duration / (1000.*1000.) << "ms since last frame = " << std::fixed << 1./duration * (1000.*1000.*1000.) << " fps" << std::endl;
+        start = std::chrono::high_resolution_clock::now();
         auto me = static_cast<UVCImageSource*>(ptr);
         me->callback(frame);
     }
