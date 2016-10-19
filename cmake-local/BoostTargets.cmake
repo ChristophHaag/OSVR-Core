@@ -23,7 +23,7 @@ else()
 endif()
 
 find_package(Boost ${OSVR_MIN_BOOST} COMPONENTS ${required_boost_components} REQUIRED)
-if(Boost_VERSION GREATER 106000)
+if(Boost_VERSION GREATER 106100)
     # Current max code-reviewed version: Boost 1.60
     # When this is updated - source code must also be updated!
     message(SEND_ERROR "Using an unreviewed Boost version - inspect the Boost Interprocess release notes/changelog/diffs to see if any ABI breaks took place as they may affect client/server interoperability.")
