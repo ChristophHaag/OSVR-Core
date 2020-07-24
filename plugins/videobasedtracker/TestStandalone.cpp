@@ -48,8 +48,8 @@ class Main {
             return;
         }
 
-        height = static_cast<int>(m_camera.get(CV_CAP_PROP_FRAME_HEIGHT));
-        width = static_cast<int>(m_camera.get(CV_CAP_PROP_FRAME_WIDTH));
+        height = static_cast<int>(m_camera.get(cv::CAP_PROP_FRAME_HEIGHT));
+        width = static_cast<int>(m_camera.get(cv::CAP_PROP_FRAME_WIDTH));
 
         // See if this is an Oculus camera by checking the dimensions of
         // the image.  This camera type improperly describes its format
@@ -62,8 +62,8 @@ class Main {
         }
 
         std::cout << "Got image of size " << width << "x" << height
-                  << ", Format " << m_camera.get(CV_CAP_PROP_FORMAT)
-                  << ", Mode " << m_camera.get(CV_CAP_PROP_MODE) << std::endl;
+                  << ", Format " << m_camera.get(cv::CAP_PROP_FORMAT)
+                  << ", Mode " << m_camera.get(cv::CAP_PROP_MODE) << std::endl;
 
         /// @todo Come up with actual estimates for camera and distortion
         /// parameters by calibrating them in OpenCV.
@@ -102,7 +102,7 @@ class Main {
         //==================================================================
         // Convert the image into a format we can use.
         // TODO: Consider reading in the image in gray scale to begin with
-        cv::cvtColor(m_frame, m_imageGray, CV_RGB2GRAY);
+        cv::cvtColor(m_frame, m_imageGray, cv::COLOR_RGB2GRAY);
 
         return m_vbtracker.processImage(
             m_frame, m_imageGray, tv,

@@ -206,10 +206,7 @@ if(BUILD_WITH_OPENCV)
     if(NOT OpenCV_FOUND)
         message(FATAL_ERROR "BUILD_WITH_OPENCV is enabled, but OpenCV was not found! Either help CMake find OpenCV or disable BUILD_WITH_OPENCV.")
     endif()
-    if(OpenCV_VERSION VERSION_LESS 2.4)
-        # At least one 2.3 version (used in Precise) is missing a header that
-        # breaks their Eigen compatibility header. This seemed like the easiest
-        # fix.
+    if(OpenCV_VERSION VERSION_LESS 4.0)
         set(BUILD_OPENCV_CAMERA_PLUGIN OFF)
     endif()
     if(WIN32)
@@ -219,10 +216,10 @@ if(BUILD_WITH_OPENCV)
         include(OpenCVAndroid)
     endif()
     # Include dir specifically required by 3.0 and up, but missing from config.
-    if(NOT OpenCV_VERSION VERSION_LESS 3.0.0)
+    if(NOT OpenCV_VERSION VERSION_LESS 4.0.0)
         list(REMOVE_DUPLICATES OpenCV_INCLUDE_DIRS)
-        set_target_properties(opencv_core PROPERTIES
-            INTERFACE_INCLUDE_DIRECTORIES "${OpenCV_INCLUDE_DIRS}")
+        # add OpenCV includes globally so they work for inc/Util/OpenCVVersion.h
+        include_directories("${OpenCV_INCLUDE_DIRS}")
     endif()
 endif()
 

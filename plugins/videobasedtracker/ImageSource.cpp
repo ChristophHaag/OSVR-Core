@@ -36,7 +36,7 @@ namespace vbtracker {
     ImageSource::~ImageSource() {}
     void ImageSource::retrieve(cv::Mat &color, cv::Mat &gray) {
         retrieveColor(color);
-        cv::cvtColor(color, gray, CV_RGB2GRAY);
+        cv::cvtColor(color, gray, cv::COLOR_RGB2GRAY);
     }
 } // namespace vbtracker
 } // namespace osvr

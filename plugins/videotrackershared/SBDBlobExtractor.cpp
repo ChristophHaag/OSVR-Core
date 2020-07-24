@@ -298,14 +298,7 @@ namespace vbtracker {
 /// @todo: Determine the maximum size of a trackable blob by seeing
 /// when we're so close that we can't view at least four in the
 /// camera.
-#if CV_MAJOR_VERSION == 2
-            cv::Ptr<cv::SimpleBlobDetector> detector =
-                new cv::SimpleBlobDetector(m_sbdParams);
-#elif CV_MAJOR_VERSION == 3
             auto detector = cv::SimpleBlobDetector::create(m_sbdParams);
-#else
-#error "Unrecognized OpenCV version!"
-#endif
             detector->detect(grayImage, m_keyPoints);
 
             // @todo: Consider computing the center of mass of a dilated
@@ -334,12 +327,12 @@ namespace vbtracker {
         cv::Mat ret;
         cv::Mat temp;
         cv::threshold(m_lastGrayImage, ret, m_sbdParams.minThreshold, 255,
-                      CV_THRESH_BINARY);
+                      cv::THRESH_BINARY);
         cv::Mat tempOut;
         for (int i = 1; getCurrentThresh(i) < m_sbdParams.maxThreshold; ++i) {
             auto currentThresh = getCurrentThresh(i);
             cv::threshold(m_lastGrayImage, temp, currentThresh, currentThresh,
-                          CV_THRESH_BINARY);
+                          cv::THRESH_BINARY);
             cv::addWeighted(ret, 0.5, temp, 0.5, 0, tempOut);
             ret = tempOut;
         }
@@ -364,7 +357,7 @@ namespace vbtracker {
 
         } else if (Algo::SimpleBlobDetector == m_algo) {
             cv::Mat tempColor;
-            cv::cvtColor(m_lastGrayImage, tempColor, CV_GRAY2BGR);
+            cv::cvtColor(m_lastGrayImage, tempColor, cv::COLOR_GRAY2BGR);
             // Draw detected blobs as blue circles.
             cv::drawKeypoints(tempColor, m_keyPoints, ret,
                               cv::Scalar(255, 0, 0),
@@ -425,12 +418,12 @@ namespace vbtracker {
         cv::Mat ret;
         cv::Mat temp;
         cv::threshold(getLatestGrayImage(), ret, m_sbdParams.minThreshold, 255,
-                      CV_THRESH_BINARY);
+                      cv::THRESH_BINARY);
         cv::Mat tempOut;
         for (int i = 1; getCurrentThresh(i) < m_sbdParams.maxThreshold; ++i) {
             auto currentThresh = getCurrentThresh(i);
             cv::threshold(getLatestGrayImage(), temp, currentThresh,
-                          currentThresh, CV_THRESH_BINARY);
+                          currentThresh, cv::THRESH_BINARY);
             cv::addWeighted(ret, 0.5, temp, 0.5, 0, tempOut);
             ret = tempOut;
         }
@@ -441,7 +434,7 @@ namespace vbtracker {
     cv::Mat SBDGenericBlobExtractor::generateDebugBlobImage_() const {
         cv::Mat ret;
         cv::Mat tempColor;
-        cv::cvtColor(getLatestGrayImage(), tempColor, CV_GRAY2BGR);
+        cv::cvtColor(getLatestGrayImage(), tempColor, cv::COLOR_GRAY2BGR);
         // Draw detected blobs as blue circles.
         cv::drawKeypoints(tempColor, m_keyPoints, ret, cv::Scalar(255, 0, 0),
                           cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
@@ -489,14 +482,7 @@ namespace vbtracker {
 /// @todo: Determine the maximum size of a trackable blob by seeing
 /// when we're so close that we can't view at least four in the
 /// camera.
-#if CV_MAJOR_VERSION == 2
-        cv::Ptr<cv::SimpleBlobDetector> detector =
-            new cv::SimpleBlobDetector(m_sbdParams);
-#elif CV_MAJOR_VERSION == 3
         auto detector = cv::SimpleBlobDetector::create(m_sbdParams);
-#else
-#error "Unrecognized OpenCV version!"
-#endif
         detector->detect(grayImage, m_keyPoints);
 
         // @todo: Consider computing the center of mass of a dilated

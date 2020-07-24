@@ -295,14 +295,6 @@ namespace vbtracker {
         int iterationsCount = 5;
         cv::Mat inlierIndices;
 
-#if CV_MAJOR_VERSION == 2
-        cv::solvePnPRansac(
-            objectPoints, imagePoints, m_camParams.cameraMatrix,
-            m_camParams.distortionParameters, m_rvec, m_tvec, usePreviousGuess,
-            iterationsCount, MaxReprojectionErrorForInlier,
-            static_cast<int>(objectPoints.size() - m_permittedOutliers),
-            inlierIndices);
-#elif CV_MAJOR_VERSION == 3
         // parameter added to the OpenCV 3.0 interface in place of the number of
         // inliers
         /// @todo how to determine this requested confidence from the data we're
@@ -315,9 +307,6 @@ namespace vbtracker {
         if (!ransacResult) {
             return false;
         }
-#else
-#error "Unrecognized OpenCV version!"
-#endif
 
         //==========================================================================
         // Make sure we got all the inliers we needed.  Otherwise, reject this

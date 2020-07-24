@@ -73,7 +73,7 @@ namespace vbtracker {
             cv::Mat image;
             std::cout << "Trying to read image from " << fileName.str()
                       << std::endl;
-            image = cv::imread(fileName.str(), CV_LOAD_IMAGE_COLOR);
+            image = cv::imread(fileName.str(), cv::IMREAD_COLOR);
             if (!image.data) {
                 break;
             }
